@@ -5,9 +5,10 @@ cd digit-recognizer
 # Create virtual environment
 python3 -m venv venv
 
-# Activate it
-# Windows
-venv\Scripts\activate
 
-# macOS/Linux
+# Activate it
+# # if Windows
+# venv\Scripts\activate
+
+# if macOS/Linux
 source venv/bin/activate
