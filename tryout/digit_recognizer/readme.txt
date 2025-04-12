@@ -1,5 +1,6 @@
 sh set_virtua_env.sh 
 python3 downloanloadmnist.py
+python3 train_digit_recognizer.py
 
 
 
