@@ -17,3 +17,6 @@ for i in range(100):
 #     plt.imsave(f"mnist_samples/img_{i}_label_{y_train[i]}.png", x_train[i], cmap="gray")
 # for i in range(20000, 40000):
 #     plt.imsave(f"mnist_samples/img_{i}_label_{y_train[i]}.png", x_train[i], cmap="gray")
+
+# for loading all the images
+# for i in range(len(x_train)):
