@@ -81,3 +81,38 @@ def plotImages(images_arr):
         ax.imshow(img)
     plt.tight_layout()
     plt.show()
+
+
+plotImages(sample_training_images[:5])
+
+
+#Create model with 4 convolution blocks with a maxpoolayer in between each
+model = tf.keras.models.Sequential([
+    tf.keras.layers.Conv2D(32, (3,3), activation='relu', input_shape=(150,150,3)),
+    tf.keras.layers.MaxPooling2D(2,2),
+
+    tf.keras.layers.Conv2D(64, (3,3), activation='relu'),
+    tf.keras.layers.MaxPooling2D(2,2),
+
+    tf.keras.layers.Conv2D(128, (3,3), activation = 'relu'),
+    tf.keras.layers.MaxPooling2D(2,2),
+
+    tf.keras.layers.Conv2D(128, (3,3), activation = 'relu'),
+    tf.keras.layers.MaxPooling2D(2,2),
+
+    tf.keras.layers.Flatten(),
+    tf.keras.layers.Dense(512, activation='relu'),
+    tf.keras.layers.Dense(2, activation='softmax') #Cause it is either a 0 or 1 
+
+
+])
+#Compile model
+#if activation = softmax then compile loss with SparseCategoricalCrossentropy
+#if activation = sigmoid then compile loss with binary_crossenteropy
+model.compile(optimizer = 'adam', 
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits = True),
+              metrics=['accuracy']
+                                    )
+
+#get a summary of the model
+model.summary()
