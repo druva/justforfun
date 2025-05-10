@@ -8,7 +8,6 @@ import logging
 logger = tf.get_logger()
 logger.setLevel(logging.ERROR)
 
-
 #download the data set
 _URL = 'https://storage.googleapis.com/mledu-datasets/cats_and_dogs_filtered.zip'
 zip_dir = tf.keras.utils.get_file('cats_and_dogs.zip', origin=_URL, extract=True)
@@ -49,3 +48,10 @@ print('total validation dog images:', num_dogs_val)
 print("--")
 print("Total training images:", total_train)
 print("Total validation images:", total_val)
+
+#prepare for training
+BATCH_SIZE = 100
+IMG_SHAPE = 150
+
+train_image_generator = ImageDataGenerator(rescale=1./255)
+validation_image_generator = ImageDataGenerator(rescale=1./255)
