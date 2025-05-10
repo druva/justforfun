@@ -9,11 +9,43 @@ logger = tf.get_logger()
 logger.setLevel(logging.ERROR)
 
 
+#download the data set
 _URL = 'https://storage.googleapis.com/mledu-datasets/cats_and_dogs_filtered.zip'
 zip_dir = tf.keras.utils.get_file('cats_and_dogs.zip', origin=_URL, extract=True)
 
 zip_dir_base = os.path.dirname(zip_dir)
 base_dir = os.path.join(zip_dir_base, 'cats_and_dogs_extracted/cats_and_dogs_filtered')
-
 print("zip_dir_base", zip_dir_base)
 print("base_dir", base_dir)
+#!find $zip_dir_base -type d -print
+zip_dir_base = "/your/path/here"  # make sure this is defined earlier in your script
+subprocess.run(["find", zip_dir_base, "-type", "d", "-print"])
+
+#create Folder Structures
+train_dir = os.path.join(base_dir, 'train')
+validation_dir = os.path.join(base_dir, 'validation')
+print(train_dir)
+print(validation_dir)
+
+train_cats_dir = os.path.join(train_dir, 'cats')
+train_dogs_dir = os.path.join(train_dir, 'dogs')
+validation_cats_dir = os.path.join(validation_dir, 'cats')
+validation_dogs_dir = os.path.join(validation_dir, 'dogs')
+print(train_cats_dir)
+print(train_dogs_dir)
+print(validation_cats_dir)
+print(validation_dogs_dir)
+
+num_cats_tr = len(os.listdir(train_cats_dir))
+num_dogs_tr = len(os.listdir(train_dogs_dir))
+num_cats_val = len(os.listdir(validation_cats_dir))
+num_dogs_val = len(os.listdir(validation_dogs_dir))
+total_train = num_cats_tr + num_dogs_tr
+total_val = num_cats_val + num_dogs_val
+print('total training cat images:', num_cats_tr)
+print('total training dog images:', num_dogs_tr)
+print('total validation cat images:', num_cats_val)
+print('total validation dog images:', num_dogs_val)
+print("--")
+print("Total training images:", total_train)
+print("Total validation images:", total_val)
