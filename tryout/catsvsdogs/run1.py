@@ -55,3 +55,29 @@ IMG_SHAPE = 150
 
 train_image_generator = ImageDataGenerator(rescale=1./255)
 validation_image_generator = ImageDataGenerator(rescale=1./255)
+
+
+#The actual rescaling
+train_data_gen = train_image_generator.flow_from_directory(batch_size=BATCH_SIZE,
+                                                           directory=train_dir,
+                                                           shuffle=True,
+                                                           target_size=(IMG_SHAPE,IMG_SHAPE), #(150,150)
+                                                           class_mode='binary')
+
+val_data_gen = validation_image_generator.flow_from_directory(batch_size=BATCH_SIZE,
+                                                              directory=validation_dir,
+                                                              shuffle=False,
+                                                              target_size=(IMG_SHAPE,IMG_SHAPE), #(150,150)
+                                                              class_mode='binary')
+
+
+#visualize images
+sample_training_images, _ = next(train_data_gen) 
+# This function will plot images in the form of a grid with 1 row and 5 columns where images are placed in each column.
+def plotImages(images_arr):
+    fig, axes = plt.subplots(1, 5, figsize=(20,20))
+    axes = axes.flatten()
+    for img, ax in zip(images_arr, axes):
+        ax.imshow(img)
+    plt.tight_layout()
+    plt.show()
