@@ -8,6 +8,7 @@ import logging
 logger = tf.get_logger()
 logger.setLevel(logging.ERROR)
 
+
 #download the data set
 _URL = 'https://storage.googleapis.com/mledu-datasets/cats_and_dogs_filtered.zip'
 zip_dir = tf.keras.utils.get_file('cats_and_dogs.zip', origin=_URL, extract=True)
@@ -56,23 +57,6 @@ IMG_SHAPE = 150
 train_image_generator = ImageDataGenerator(rescale=1./255)
 validation_image_generator = ImageDataGenerator(rescale=1./255)
 
-
-#The actual rescaling
-train_data_gen = train_image_generator.flow_from_directory(batch_size=BATCH_SIZE,
-                                                           directory=train_dir,
-                                                           shuffle=True,
-                                                           target_size=(IMG_SHAPE,IMG_SHAPE), #(150,150)
-                                                           class_mode='binary')
-
-val_data_gen = validation_image_generator.flow_from_directory(batch_size=BATCH_SIZE,
-                                                              directory=validation_dir,
-                                                              shuffle=False,
-                                                              target_size=(IMG_SHAPE,IMG_SHAPE), #(150,150)
-                                                              class_mode='binary')
-
-
-#visualize images
-sample_training_images, _ = next(train_data_gen) 
 # This function will plot images in the form of a grid with 1 row and 5 columns where images are placed in each column.
 def plotImages(images_arr):
     fig, axes = plt.subplots(1, 5, figsize=(20,20))
@@ -83,49 +67,107 @@ def plotImages(images_arr):
     plt.show()
 
 
-plotImages(sample_training_images[:5])
+image_gen = ImageDataGenerator(rescale=1./255, horizontal_flip=True)
+
+train_data_gen = image_gen.flow_from_directory(batch_size=BATCH_SIZE,
+                                               directory=train_dir,
+                                               shuffle=True,
+                                               target_size=(IMG_SHAPE,IMG_SHAPE))
+
+augmented_images = [train_data_gen[0][0][0] for i in range(5)]
+plotImages(augmented_images)
 
 
-#Create model with 4 convolution blocks with a maxpoolayer in between each
+
+image_gen = ImageDataGenerator(rescale=1./255, rotation_range=45)
+
+train_data_gen = image_gen.flow_from_directory(batch_size=BATCH_SIZE,
+                                               directory=train_dir,
+                                               shuffle=True,
+                                               target_size=(IMG_SHAPE, IMG_SHAPE))
+
+
+
+augmented_images = [train_data_gen[0][0][0] for i in range(5)]
+plotImages(augmented_images)
+
+
+
+image_gen = ImageDataGenerator(rescale=1./255, zoom_range=0.5)
+
+train_data_gen = image_gen.flow_from_directory(batch_size=BATCH_SIZE,
+                                               directory=train_dir,
+                                               shuffle=True,
+                                               target_size=(IMG_SHAPE, IMG_SHAPE))
+
+
+augmented_images = [train_data_gen[0][0][0] for i in range(5)]
+plotImages(augmented_images)
+
+
+image_gen_train = ImageDataGenerator(
+      rescale=1./255,
+      rotation_range=40,
+      width_shift_range=0.2,
+      height_shift_range=0.2,
+      shear_range=0.2,
+      zoom_range=0.2,
+      horizontal_flip=True,
+      fill_mode='nearest')
+
+train_data_gen = image_gen_train.flow_from_directory(batch_size=BATCH_SIZE,
+                                                     directory=train_dir,
+                                                     shuffle=True,
+                                                     target_size=(IMG_SHAPE,IMG_SHAPE),
+                                                     class_mode='binary')
+
+augmented_images = [train_data_gen[0][0][0] for i in range(5)]
+plotImages(augmented_images)
+
+
+image_gen_val = ImageDataGenerator(rescale=1./255)
+
+val_data_gen = image_gen_val.flow_from_directory(batch_size=BATCH_SIZE,
+                                                 directory=validation_dir,
+                                                 target_size=(IMG_SHAPE, IMG_SHAPE),
+                                                 class_mode='binary')
+
+
 model = tf.keras.models.Sequential([
-    tf.keras.layers.Conv2D(32, (3,3), activation='relu', input_shape=(150,150,3)),
-    tf.keras.layers.MaxPooling2D(2,2),
+    tf.keras.layers.Conv2D(32, (3,3), activation='relu', input_shape=(150, 150, 3)),
+    tf.keras.layers.MaxPooling2D(2, 2),
 
     tf.keras.layers.Conv2D(64, (3,3), activation='relu'),
     tf.keras.layers.MaxPooling2D(2,2),
 
-    tf.keras.layers.Conv2D(128, (3,3), activation = 'relu'),
+    tf.keras.layers.Conv2D(128, (3,3), activation='relu'),
     tf.keras.layers.MaxPooling2D(2,2),
 
-    tf.keras.layers.Conv2D(128, (3,3), activation = 'relu'),
+    tf.keras.layers.Conv2D(128, (3,3), activation='relu'),
     tf.keras.layers.MaxPooling2D(2,2),
 
+    tf.keras.layers.Dropout(0.5),
     tf.keras.layers.Flatten(),
     tf.keras.layers.Dense(512, activation='relu'),
-    tf.keras.layers.Dense(2, activation='softmax') #Cause it is either a 0 or 1 
-
-
+    tf.keras.layers.Dense(2)
 ])
-#Compile model
-#if activation = softmax then compile loss with SparseCategoricalCrossentropy
-#if activation = sigmoid then compile loss with binary_crossenteropy
-model.compile(optimizer = 'adam', 
-              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits = True),
-              metrics=['accuracy']
-                                    )
 
-#get a summary of the model
+
+model.compile(optimizer='adam',
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              metrics=['accuracy'])
+
+
 model.summary()
 
 
-#Train model, use fitgenerator instead of fit since its coming from a generator
-EPOCHS = 40
+epochs=100
 history = model.fit(
     train_data_gen,
-    steps_per_epoch = int(np.ceil(total_train/float(BATCH_SIZE))),
-    epochs=EPOCHS,
+    steps_per_epoch=int(np.ceil(total_train / float(BATCH_SIZE))),
+    epochs=epochs,
     validation_data=val_data_gen,
-    validation_steps=int(np.ceil(total_val/float(BATCH_SIZE)))
+    validation_steps=int(np.ceil(total_val / float(BATCH_SIZE)))
 )
 
 acc = history.history['accuracy']
@@ -134,7 +176,7 @@ val_acc = history.history['val_accuracy']
 loss = history.history['loss']
 val_loss = history.history['val_loss']
 
-epochs_range = range(EPOCHS)
+epochs_range = range(epochs)
 
 plt.figure(figsize=(8, 8))
 plt.subplot(1, 2, 1)
@@ -148,7 +190,4 @@ plt.plot(epochs_range, loss, label='Training Loss')
 plt.plot(epochs_range, val_loss, label='Validation Loss')
 plt.legend(loc='upper right')
 plt.title('Training and Validation Loss')
-plt.savefig('./foo.png')
 plt.show()
-
-#Next Steps is to do image augmentation for training
