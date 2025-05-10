@@ -70,7 +70,8 @@ def viewMoreImages(dataset, class_names, verbose):
             plt.xlabel(class_names[label])
         plt.show()
 
-def createModel():
+def createModelBase():
+    print("createModelBase")
     model = tf.keras.Sequential([
         tf.keras.layers.Flatten(input_shape=(28, 28, 1)),
         tf.keras.layers.Dense(128, activation=tf.nn.relu),
@@ -78,7 +79,22 @@ def createModel():
     ])
     return model
 
+def createModelCNN():
+    print("createModelCNN")
+    model = tf.keras.Sequential([
+        tf.keras.layers.Conv2D(32, (3,3), padding='same', activation=tf.nn.relu,
+                               input_shape=(28, 28, 1)),
+        tf.keras.layers.MaxPooling2D((2, 2), strides=2),
+        tf.keras.layers.Conv2D(64, (3,3), padding='same', activation=tf.nn.relu),
+        tf.keras.layers.MaxPooling2D((2, 2), strides=2),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(128, activation=tf.nn.relu),
+        tf.keras.layers.Dense(10, activation=tf.nn.softmax)
+    ])
+    return model
+
 def compileModel(model):
+    print("compileModel")
     model.compile(optimizer='adam',
               loss=tf.keras.losses.SparseCategoricalCrossentropy(),
               metrics=['accuracy'])
@@ -128,7 +144,7 @@ def run1(itr):
     dataset, metadata, train_dataset, test_dataset, class_names, num_train_examples, num_test_examples = initDataSet(verbose)
     # viewOneImage(test_dataset, verbose)
     # viewMoreImages(test_dataset, class_names, verbose)
-    model = createModel()
+    model = createModelCNN()
     model = compileModel(model)
 
 
@@ -148,11 +164,12 @@ def run1(itr):
     return BATCH_SIZE, test_dataset, class_names, num_test_examples, model
 
 def run2(itr):
+    print("run2", itr)
     verbose = True
     dataset, metadata, train_dataset, test_dataset, class_names, num_train_examples, num_test_examples = initDataSet(verbose)
     # viewOneImage(test_dataset, verbose)
     # viewMoreImages(test_dataset, class_names, verbose)
-    model = createModel()
+    model = createModelBase()
     model = compileModel(model)
 
 
@@ -164,11 +181,12 @@ def run2(itr):
 
     for i in range(itr):
         print(f"Running Fit ({i+1})n times")
-        history = model.fit(train_dataset, epochs=8)
+        history = model.fit(train_dataset, epochs=10)
     showLoss(history)
     return BATCH_SIZE, test_dataset, class_names, num_test_examples, model
 
 def run():
+    print("run1")
     #Experiment 1
     BATCH_SIZE, test_dataset, class_names, num_test_examples, model = run1(1)
     #Experiment 2
@@ -195,4 +213,4 @@ def run():
         plt.subplot(num_rows, 2*num_cols, 2*i+2)
         plot_value_array(i, predictions, test_labels)
 
-run()
+run1(2)
